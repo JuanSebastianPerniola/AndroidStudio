@@ -22,7 +22,7 @@ public class Actividad2 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_actividad2);
 
-        // Initialize buttons and input fields
+        // Iniciamos botones de input
         Button volverAlMain = findViewById(R.id.ButtonGetBackToMainMenu);
         Button guardar = findViewById(R.id.Guardar);
         Button mostrar = findViewById(R.id.Mostrar);
@@ -30,7 +30,7 @@ public class Actividad2 extends AppCompatActivity {
         EditText campo1 = findViewById(R.id.campo1);
         EditText campo2 = findViewById(R.id.capo2);
 
-        // Clear the fields initially (optional)
+        // Limpiar los campos
         campo1.getText().clear();
         campo2.getText().clear();
 
@@ -43,7 +43,7 @@ public class Actividad2 extends AppCompatActivity {
             String campo1Text = campo1.getText().toString();
             String campo2Text = campo2.getText().toString();
 
-            // Input validation (only allow alphabets)
+            // validamos alfabaticos valores
             String regex = "^[a-zA-Z]+$";
             Pattern pattern = Pattern.compile(regex);
 

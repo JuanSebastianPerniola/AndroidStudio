@@ -5,157 +5,100 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.Toast;
-
-import androidx.activity.EdgeToEdge;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
-
 public class Actividad5 extends AppCompatActivity {
+    EditText EditTextDNI, EditTextNombre;
+    Button BotonInsertar, BotonListar, BotonBorrar, BotonActualizar;
+    ListView ListaRegistros;
+    ArrayAdapter<String> Adaptador;
+    SQLiteDatabase BaseDatos;
+    public static int IdSeleccionado = -1;
+    public static java.util.ArrayList<String> Registros = new java.util.ArrayList<>();
 
-    private EditText editTextDNI, editTextName;
-    private Button buttonInsert, buttonList, buttonDelete, buttonUpdate;
-    private ListView listViewRecords;
-    private ArrayList<String> records;
-    private ArrayAdapter<String> adapter;
-    private SQLiteDatabase db;
-    private int selectedId = -1;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+    protected void onCreate(Bundle InstanciaGuardada) {
+        super.onCreate(InstanciaGuardada);
         setContentView(R.layout.activity_actividad5);
 
+        EditTextDNI = findViewById(R.id.editTextDNI);
+        EditTextNombre = findViewById(R.id.editTextName);
+        BotonInsertar = findViewById(R.id.botonInsert);
+        BotonListar = findViewById(R.id.botonLista);
+        BotonBorrar = findViewById(R.id.buttonDelete);
+        BotonActualizar = findViewById(R.id.buttonUpdate);
+        ListaRegistros = findViewById(R.id.listViewRecords);
 
-// Initialize views
-        editTextDNI = findViewById(R.id.editTextDNI);
-        editTextName = findViewById(R.id.editTextName);
-        buttonInsert = findViewById(R.id.botonInsert);
-        buttonList = findViewById(R.id.botonLista);
-        buttonDelete = findViewById(R.id.buttonDelete);
-        buttonUpdate = findViewById(R.id.buttonUpdate);
-        listViewRecords = findViewById(R.id.listViewRecords);
+        BaseDatos = openOrCreateDatabase("BaseDatos", Context.MODE_PRIVATE, null);
+        BaseDatos.execSQL("CREATE TABLE IF NOT EXISTS personas(id INTEGER PRIMARY KEY AUTOINCREMENT, dni TEXT, nombre TEXT);");
 
-        // Initialize database
-        db = openOrCreateDatabase("MyDB", Context.MODE_PRIVATE, null);
-        db.execSQL("CREATE TABLE IF NOT EXISTS people(id INTEGER PRIMARY KEY AUTOINCREMENT, dni TEXT, name TEXT);");
+        Adaptador = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, Registros);
+        ListaRegistros.setAdapter(Adaptador);
 
-        // Initialize list
-        records = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, records);
-        listViewRecords.setAdapter(adapter);
-
-        // Set click listeners
-        buttonInsert.setOnClickListener(v -> insertRecord());
-        buttonList.setOnClickListener(v -> listRecords());
-        buttonDelete.setOnClickListener(v -> showDeleteDialog());
-        buttonUpdate.setOnClickListener(v -> showUpdateDialog());
-
-        listViewRecords.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedItem = records.get(position);
-            selectedId = Integer.parseInt(selectedItem.split(" - ")[0]);
-            Cursor cursor = db.rawQuery("SELECT dni, name FROM people WHERE id = ?",
-                    new String[]{String.valueOf(selectedId)});
-            if (cursor.moveToFirst()) {
-                editTextDNI.setText(cursor.getString(0));
-                editTextName.setText(cursor.getString(1));
+        BotonInsertar.setOnClickListener(v -> {
+            if(!EditTextDNI.getText().toString().isEmpty() && !EditTextNombre.getText().toString().isEmpty()) {
+                BaseDatos.execSQL("INSERT INTO personas (dni, nombre) VALUES ('" + EditTextDNI.getText() + "', '" + EditTextNombre.getText() + "')");
+                Toast.makeText(this, "Insertado", Toast.LENGTH_SHORT).show();
+                EditTextDNI.setText(""); EditTextNombre.setText("");
+                Registros.clear();
+                Cursor Consulta = BaseDatos.rawQuery("SELECT * FROM personas", null);
+                while(Consulta.moveToNext()) Registros.add(Consulta.getInt(0) + " - " + Consulta.getString(1) + " - " + Consulta.getString(2));
+                Consulta.close();
+                Adaptador.notifyDataSetChanged();
             }
-            cursor.close();
         });
-    }
 
-    private void insertRecord() {
-        String dni = editTextDNI.getText().toString();
-        String name = editTextName.getText().toString();
+        BotonListar.setOnClickListener(v -> {
+            Registros.clear();
+            Cursor Consulta = BaseDatos.rawQuery("SELECT * FROM personas", null);
+            while(Consulta.moveToNext()) Registros.add(Consulta.getInt(0) + " - " + Consulta.getString(1) + " - " + Consulta.getString(2));
+            Consulta.close();
+            Adaptador.notifyDataSetChanged();
+        });
 
-        if (!dni.isEmpty() && !name.isEmpty()) {
-            db.execSQL("INSERT INTO people (dni, name) VALUES (?, ?)",
-                    new String[]{dni, name});
-            Toast.makeText(this, "Registre inserit correctament", Toast.LENGTH_SHORT).show();
-            clearFields();
-            listRecords();
-        } else {
-            Toast.makeText(this, "Si us plau, ompliu tots els camps", Toast.LENGTH_SHORT).show();
-        }
-    }
+        BotonBorrar.setOnClickListener(v -> {
+            if(IdSeleccionado != -1) {
+                new AlertDialog.Builder(this).setTitle("¿Seguro?").setMessage("¿Borrar?")
+                        .setPositiveButton("Sí", (dialogo, cual) -> {
+                            BaseDatos.execSQL("DELETE FROM personas WHERE id = " + IdSeleccionado);
+                            Toast.makeText(this, "Borrado", Toast.LENGTH_SHORT).show();
+                            IdSeleccionado = -1;
+                            EditTextDNI.setText("");
+                            EditTextNombre.setText("");
+                            Registros.clear();
+                            Cursor Consulta = BaseDatos.rawQuery("SELECT * FROM personas", null);
+                            while(Consulta.moveToNext()) Registros.add(Consulta.getInt(0) + " - " + Consulta.getString(1) + " - " + Consulta.getString(2));
+                            Consulta.close();
+                            Adaptador.notifyDataSetChanged();
+                        }).setNegativeButton("No", null).show();
+            }
+        });
 
-    private void listRecords() {
-        records.clear();
-        Cursor cursor = db.rawQuery("SELECT * FROM people", null);
-        while (cursor.moveToNext()) {
-            records.add(cursor.getInt(0) + " - " + cursor.getString(1) + " - " + cursor.getString(2));
-        }
-        cursor.close();
-        adapter.notifyDataSetChanged();
-    }
+        BotonActualizar.setOnClickListener(v -> {
+            if(IdSeleccionado != -1) {
+                new AlertDialog.Builder(this).setTitle("¿Seguro?").setMessage("¿Actualizar?")
+                        .setPositiveButton("Sí", (dialogo, cual) -> {
+                            if(!EditTextDNI.getText().toString().isEmpty() && !EditTextNombre.getText().toString().isEmpty()) {
+                                BaseDatos.execSQL("UPDATE personas SET dni='" + EditTextDNI.getText() + "', nombre='" + EditTextNombre.getText() + "' WHERE id=" + IdSeleccionado);
+                                Toast.makeText(this, "Actualizado", Toast.LENGTH_SHORT).show();
+                                IdSeleccionado = -1;
+                                EditTextDNI.setText("");
+                                EditTextNombre.setText("");
+                                Registros.clear();
+                                Cursor Consulta = BaseDatos.rawQuery("SELECT * FROM personas", null);
+                                while(Consulta.moveToNext()) Registros.add(Consulta.getInt(0) + " - " + Consulta.getString(1) + " - " + Consulta.getString(2));
+                                Consulta.close();
+                                Adaptador.notifyDataSetChanged();
+                            }
+                        }).setNegativeButton("No", null).show();
+            }
+        });
 
-    private void showDeleteDialog() {
-        if (selectedId == -1) {
-            Toast.makeText(this, "Si us plau, seleccioneu un registre", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Confirmar eliminació")
-                .setMessage("Esteu segur que voleu eliminar aquest registre?")
-                .setPositiveButton("Sí", (dialog, which) -> deleteRecord())
-                .setNegativeButton("No", null)
-                .show();
-    }
-
-    private void deleteRecord() {
-        db.execSQL("DELETE FROM people WHERE id = ?",
-                new String[]{String.valueOf(selectedId)});
-        Toast.makeText(this, "Registre eliminat correctament", Toast.LENGTH_SHORT).show();
-        selectedId = -1;
-        clearFields();
-        listRecords();
-    }
-
-    private void showUpdateDialog() {
-        if (selectedId == -1) {
-            Toast.makeText(this, "Si us plau, seleccioneu un registre", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Confirmar modificació")
-                .setMessage("Esteu segur que voleu modificar aquest registre?")
-                .setPositiveButton("Sí", (dialog, which) -> updateRecord())
-                .setNegativeButton("No", null)
-                .show();
-    }
-
-    private void updateRecord() {
-        String dni = editTextDNI.getText().toString();
-        String name = editTextName.getText().toString();
-
-        if (!dni.isEmpty() && !name.isEmpty()) {
-            db.execSQL("UPDATE people SET dni = ?, name = ? WHERE id = ?",
-                    new String[]{dni, name, String.valueOf(selectedId)});
-            Toast.makeText(this, "Registre modificat correctament", Toast.LENGTH_SHORT).show();
-            selectedId = -1;
-            clearFields();
-            listRecords();
-        } else {
-            Toast.makeText(this, "Si us plau, ompliu tots els camps", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void clearFields() {
-        editTextDNI.setText("");
-        editTextName.setText("");
-    }
-
-    @Override
-    protected void onDestroy() {
-        db.close();
-        super.onDestroy();
+        ListaRegistros.setOnItemClickListener((padre, vista, posicion, id) -> {
+            String[] partes = Registros.get(posicion).split(" - ");
+            IdSeleccionado = Integer.parseInt(partes[0]);
+            EditTextDNI.setText(partes[1]);
+            EditTextNombre.setText(partes[2]);
+        });
     }
 }

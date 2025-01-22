@@ -34,10 +34,10 @@ public class Actividad4 extends AppCompatActivity {
             FileWriter writer = new FileWriter(file);
             writer.write(text);
             writer.close();
-            Toast.makeText(this, "Text saved successfully", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Texto guardado", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Error saving text: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error al guardarlo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -45,20 +45,21 @@ public class Actividad4 extends AppCompatActivity {
         EditText texto = findViewById(R.id.InputInformacion);
         try {
             File file = new File(Environment.getExternalStorageDirectory(), FILENAME);
-            BufferedReader reader = new BufferedReader(new FileReader(file));
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             StringBuilder text = new StringBuilder();
             String line;
 
-            while ((line = reader.readLine()) != null) {
+            while ((line = bufferedReader.readLine()) != null) {
                 text.append(line);
                 text.append('\n');
             }
-            reader.close();
+            // lo cerramos
+            bufferedReader.close();
 
             texto.setText(text.toString());
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Error reading text: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "error al leerlo : " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }
