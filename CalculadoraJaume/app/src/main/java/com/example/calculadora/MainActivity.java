@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         Button restar = findViewById(R.id.buttonDelete);
         Button dividir = findViewById(R.id.buttonDividir);
         Button multiplicar = findViewById(R.id.buttonMultiplicar);
-        TextView resultado = findViewById(R.id.resultado);
+        EditText resultado = findViewById(R.id.textView);
 
         sumar.setOnClickListener(view -> {
             // Llama al método para calcular la suma
