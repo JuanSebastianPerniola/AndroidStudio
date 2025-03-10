@@ -10,10 +10,10 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private TextView display = findViewById(R.id.textView);
-    private String currentInput = "";
-    private String currentOperator = "";
-    private double firstNumber = 0;
-    private boolean isOperatorClicked = false;
+    private String inputActual = "";
+    private String operadorActual = "";
+    private double primerNumero = 0;
+    private boolean operadorClick = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         Button borrar = findViewById(R.id.buttonCA);
         Button borrarUltimo = findViewById(R.id.buttonDelete);
 
-        // Acciones al pulsar botones
+        // Acciones al pulsar botones como en java eventclick listener
         sumar.setOnClickListener(v -> onOperatorClick("+"));
         restar.setOnClickListener(v -> onOperatorClick("-"));
         multiplicar.setOnClickListener(v -> onOperatorClick("*"));
@@ -56,54 +56,55 @@ public class MainActivity extends AppCompatActivity {
 
     // metodo para manejar el clic en los botones numéricos
     private void onNumberButtonClick(String number) {
-        if (isOperatorClicked) {
-            currentInput = "";
-            isOperatorClicked = false;
+        if (operadorClick) {
+            inputActual = "";
+            operadorClick = false;
         }
-        currentInput += number;
-        display.setText(currentInput);
+        inputActual += number;
+        display.setText(inputActual);
     }
 
     // metodo para manejar el clic en los botones de operación
     private void onOperatorClick(String operator) {
-        if (!currentInput.isEmpty()) {
+        if (!inputActual.isEmpty()) {
             // Si ya hay un operador, control sobre operadores ya puestos
-            if (!currentOperator.isEmpty()) {
+            if (!operadorActual.isEmpty()) {
                 return;
             }
-            firstNumber = Double.parseDouble(currentInput);
-            currentOperator = operator;
-            isOperatorClicked = true;
-            currentInput += " " + operator + " "; // Agrega el operador al TextView
-            display.setText(currentInput);
+            primerNumero = Double.parseDouble(inputActual);
+            operadorActual = operator;
+            operadorClick = true;
+            inputActual += " " + operator + " ";
+            display.setText(inputActual);
         }
     }
 
     // metodo para manejar el clic en el botón de igual
     private void onEqualsClick() {
-        if (!currentInput.isEmpty() && !currentOperator.isEmpty()) {
+        if (!inputActual.isEmpty() && !operadorActual.isEmpty()) {
             // Agarramos el segundo numero añadido
-            String[] parts = currentInput.split(" ");
+            String[] parts = inputActual.split(" ");
             if (parts.length < 3) {
                 display.setText("Error: Formato invalido");
                 return;
             }
-            double secondNumber = Double.parseDouble(parts[2]);
+            double segundNumero = Double.parseDouble(parts[2]);
             double result = 0;
             // switch para causisticas
-            switch (currentOperator) {
+            switch (operadorActual) {
                 case "+":
-                    result = firstNumber + secondNumber;
+                    result = primerNumero + segundNumero;
                     break;
                 case "-":
-                    result = firstNumber - secondNumber;
+                    result = primerNumero - segundNumero;
                     break;
                 case "*":
-                    result = firstNumber * secondNumber;
+                    result = primerNumero * segundNumero;
                     break;
                 case "/":
-                    if (secondNumber != 0) {
-                        result = firstNumber / secondNumber;
+                    // no se puede dividir por cero
+                    if (segundNumero != 0) {
+                        result = primerNumero / segundNumero;
                     } else {
                         display.setText("Error: División por cero");
                         return;
@@ -112,26 +113,26 @@ public class MainActivity extends AppCompatActivity {
             }
 
             display.setText(String.valueOf(result));
-            currentInput = String.valueOf(result);
-            currentOperator = "";
-            isOperatorClicked = true;
+            inputActual = String.valueOf(result);
+            operadorActual = "";
+            operadorClick = true;
         }
     }
 
     // metodo para manejar el clic en el botón de borrar todo
     private void Limpiar() {
-        currentInput = "";
-        firstNumber = 0;
-        currentOperator = "";
-        isOperatorClicked = false;
+        inputActual = "";
+        primerNumero = 0;
+        operadorActual = "";
+        operadorClick = false;
         display.setText("0");
     }
 
     // metodo para manejar el clic en el boton de borrar el ultimo boton
     private void BorrarUltimo() {
-        if (currentInput.length() > 0) {
-            currentInput = currentInput.substring(0, currentInput.length() - 1);
-            display.setText(currentInput);
+        if (inputActual.length() > 0) {
+            inputActual = inputActual.substring(0, inputActual.length() - 1);
+            display.setText(inputActual);
         }
     }
 }
