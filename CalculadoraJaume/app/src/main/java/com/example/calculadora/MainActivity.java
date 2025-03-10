@@ -8,7 +8,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-
+    // inicializacion de values
+    // porque private arriba? costumbres del trabajo
     private TextView display = findViewById(R.id.textView);
     private String inputActual = "";
     private String operadorActual = "";
@@ -20,13 +21,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-
         // Iniciamos los botones
         int[] numberButtonIds = {
                 R.id.button0, R.id.button1, R.id.button2, R.id.button3,
                 R.id.button4, R.id.button5, R.id.button6, R.id.button7,
                 R.id.button8, R.id.button9, R.id.buttonDecimal
         };
+
         // foreach anidado para recorrer cada boton
         // parecido a un foreach en c# .net
         for (int id : numberButtonIds) {
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
             if (!operadorActual.isEmpty()) {
                 return;
             }
+            // volvemos todos lo valores a su valor default
             primerNumero = Double.parseDouble(inputActual);
             operadorActual = operator;
             operadorClick = true;
@@ -121,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
     // metodo para manejar el clic en el botón de borrar todo
     private void Limpiar() {
+        // limpiamos todos los valores a sus valores defauñr
         inputActual = "";
         primerNumero = 0;
         operadorActual = "";
@@ -130,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
     // metodo para manejar el clic en el boton de borrar el ultimo boton
     private void BorrarUltimo() {
+        // borramos ultimo valor
         if (inputActual.length() > 0) {
             inputActual = inputActual.substring(0, inputActual.length() - 1);
             display.setText(inputActual);
